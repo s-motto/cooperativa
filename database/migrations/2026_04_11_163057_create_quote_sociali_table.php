@@ -13,7 +13,17 @@ return new class extends Migration
     {
         Schema::create('quote_sociali', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('socio_id')
+                ->constrained()
+                ->cascadeOnDelete();
+            $table->integer('anno');
+            $table->decimal('importo', 8, 2);
+            $table->date('data_pagamento');
+            $table->enum('conto', ['cassa', 'banca']);
+            $table->text('note')->nullable();
             $table->timestamps();
+
+            $table->unique(['socio_id', 'anno']); // un socio paga una sola quota per anno
         });
     }
 
