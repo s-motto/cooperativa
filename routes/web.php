@@ -26,6 +26,8 @@ Route::middleware('auth')->group(function () {
 
     // Rotte solo admin
     Route::middleware('isAdmin')->group(function () {
+        Route::get('movimenti/export', [MovimentoController::class, 'export'])
+    ->name('movimenti.export');
         Route::resource('movimenti', MovimentoController::class)
     ->parameters(['movimenti' => 'movimento']);
         Route::resource('soci', SocioController::class)

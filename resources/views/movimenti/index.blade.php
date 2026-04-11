@@ -1,14 +1,15 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Prima Nota
-            </h2>
-            <a href="{{ route('movimenti.create') }}"
-               class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700">
-                + Nuovo movimento
-            </a>
-        </div>
+        <div class="flex gap-3">
+    <a href="{{ route('movimenti.export') }}"
+       style="background:#16a34a;color:white;padding:8px 16px;border-radius:8px;font-size:0.875rem;text-decoration:none;">
+        ↓ Esporta Excel
+    </a>
+    <a href="{{ route('movimenti.create') }}"
+       style="background:#4f46e5;color:white;padding:8px 16px;border-radius:8px;font-size:0.875rem;text-decoration:none;">
+        + Nuovo movimento
+    </a>
+</div>
     </x-slot>
 
     <div class="py-12">

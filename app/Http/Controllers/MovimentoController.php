@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 use App\Models\Movimento;
 use App\Models\Categoria;
 use Illuminate\Http\Request;
-
+use App\Exports\MovimentiExport;
+use Maatwebsite\Excel\Facades\Excel;
 class MovimentoController extends Controller
 {
     /**
@@ -99,6 +100,16 @@ public function update(Request $request, Movimento $movimento)
         ->with('success', 'Movimento aggiornato correttamente.');
 }
 
+public function export(Request $request)
+{
+    $da    = $request->da;
+    $a     = $request->a;
+    $conto = $request->conto;
+
+    $filename = 'prima-nota-' . now()->format('Y-m-d') . '.xlsx';
+
+    return Excel::download(new MovimentiExport($da, $a, $conto), $filename);
+}
 public function destroy(Movimento $movimento)
 {
     $movimento->delete();
