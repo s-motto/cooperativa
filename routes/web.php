@@ -34,6 +34,8 @@ Route::middleware('auth')->group(function () {
 Route::resource('verbali', VerbaleController::class)
     ->parameters(['verbali' => 'verbale']);
     });
+    Route::post('soci/{socio}/quote', [SocioController::class, 'storeQuota'])
+    ->name('soci.quote.store');
 
 });
 
