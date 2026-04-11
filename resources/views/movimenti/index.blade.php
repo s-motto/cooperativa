@@ -1,0 +1,94 @@
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex justify-between items-center">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                Prima Nota
+            </h2>
+            <a href="{{ route('movimenti.create') }}"
+               class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700">
+                + Nuovo movimento
+            </a>
+        </div>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+
+            {{-- Saldi --}}
+            <div class="grid grid-cols-2 gap-6 mb-6">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <p class="text-sm text-gray-500">Saldo Cassa</p>
+                    <p class="text-2xl font-bold {{ $saldo_cassa >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                        € {{ number_format($saldo_cassa, 2, ',', '.') }}
+                    </p>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <p class="text-sm text-gray-500">Saldo Banca</p>
+                    <p class="text-2xl font-bold {{ $saldo_banca >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                        € {{ number_format($saldo_banca, 2, ',', '.') }}
+                    </p>
+                </div>
+            </div>
+
+            {{-- Tabella movimenti --}}
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-gray-600">Data</th>
+                            <th class="px-4 py-3 text-left text-gray-600">Descrizione</th>
+                            <th class="px-4 py-3 text-left text-gray-600">Categoria</th>
+                            <th class="px-4 py-3 text-left text-gray-600">Conto</th>
+                            <th class="px-4 py-3 text-right text-gray-600">Importo</th>
+                            <th class="px-4 py-3"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse($movimenti as $movimento)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-gray-600">
+                                    {{ $movimento->data->format('d/m/Y') }}
+                                </td>
+                                <td class="px-4 py-3 font-medium text-gray-800">
+                                    {{ $movimento->descrizione }}
+                                </td>
+                                <td class="px-4 py-3 text-gray-500">
+                                    {{ $movimento->categoria?->nome ?? '—' }}
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="px-2 py-1 rounded-full text-xs
+                                        {{ $movimento->conto === 'cassa' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800' }}">
+                                        {{ ucfirst($movimento->conto) }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-right font-semibold
+                                    {{ $movimento->tipo === 'entrata' ? 'text-green-600' : 'text-red-600' }}">
+                                    {{ $movimento->tipo === 'entrata' ? '+' : '-' }}
+                                    € {{ number_format($movimento->importo, 2, ',', '.') }}
+                                </td>
+                                <td class="px-4 py-3 text-right">
+                                    <a href="{{ route('movimenti.edit', $movimento) }}"
+                                       class="text-indigo-600 hover:underline text-xs">Modifica</a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="px-4 py-8 text-center text-gray-400">
+                                    Nessun movimento registrato ancora.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+
+                {{-- Paginazione --}}
+                @if($movimenti->hasPages())
+                    <div class="px-4 py-3 border-t border-gray-100">
+                        {{ $movimenti->links() }}
+                    </div>
+                @endif
+            </div>
+
+        </div>
+    </div>
+</x-app-layout>
