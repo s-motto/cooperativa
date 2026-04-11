@@ -28,8 +28,11 @@ Route::middleware('auth')->group(function () {
     Route::middleware('isAdmin')->group(function () {
         Route::resource('movimenti', MovimentoController::class)
     ->parameters(['movimenti' => 'movimento']);
-        Route::resource('soci', SocioController::class);
-        Route::resource('verbali', VerbaleController::class);
+        Route::resource('soci', SocioController::class)
+    ->parameters(['soci' => 'socio']);
+
+Route::resource('verbali', VerbaleController::class)
+    ->parameters(['verbali' => 'verbale']);
     });
 
 });
