@@ -6,5 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Categoria extends Model
 {
-    //
+    protected $fillable = [
+        'nome',
+        'tipo',
+        'colore',
+    ];
+
+    // Una categoria ha molti movimenti
+    public function movimenti()
+    {
+        return $this->hasMany(Movimento::class);
+    }
 }
