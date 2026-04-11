@@ -13,10 +13,17 @@ return new class extends Migration
     {
         Schema::create('soci', function (Blueprint $table) {
             $table->id();
+            $table->string('nome');
+            $table->string('cognome');
+            $table->string('codice_fiscale')->unique()->nullable();
+            $table->string('email')->nullable();
+            $table->string('telefono')->nullable();
+            $table->date('data_ingresso');
+            $table->enum('stato', ['attivo', 'sospeso', 'uscito'])->default('attivo');
+            $table->text('note')->nullable();
             $table->timestamps();
         });
     }
-
     /**
      * Reverse the migrations.
      */
