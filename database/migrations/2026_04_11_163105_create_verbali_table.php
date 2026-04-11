@@ -13,6 +13,14 @@ return new class extends Migration
     {
         Schema::create('verbali', function (Blueprint $table) {
             $table->id();
+            $table->date('data');
+            $table->enum('tipo', ['assemblea', 'consiglio', 'straordinaria']);
+            $table->string('oggetto');
+            $table->text('contenuto')->nullable();
+            $table->string('file_path')->nullable();
+            $table->foreignId('user_id')
+                ->constrained()
+                ->restrictOnDelete();
             $table->timestamps();
         });
     }
