@@ -12,11 +12,19 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
-                </div>
-            </div>
+    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+        Dashboard
+    </x-nav-link>
+    <x-nav-link :href="route('movimenti.index')" :active="request()->routeIs('movimenti.*')">
+        Prima Nota
+    </x-nav-link>
+    <x-nav-link :href="route('soci.index')" :active="request()->routeIs('soci.*')">
+        Soci
+    </x-nav-link>
+    <x-nav-link :href="route('verbali.index')" :active="request()->routeIs('verbali.*')">
+        Verbali
+    </x-nav-link>
+</div>
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
