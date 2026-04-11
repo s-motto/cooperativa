@@ -29,6 +29,22 @@
 
             <!-- Page Content -->
             <main>
+                {{-- Messaggi flash --}}
+@if(session('success'))
+    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
+         style="position:fixed;top:20px;right:20px;z-index:9999;background:#22c55e;color:white;padding:12px 20px;border-radius:8px;font-size:0.875rem;box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+        ✓ {{ session('success') }}
+    </div>
+@endif
+
+@if(session('error'))
+    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
+         style="position:fixed;top:20px;right:20px;z-index:9999;background:#ef4444;color:white;padding:12px 20px;border-radius:8px;font-size:0.875rem;box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+        ✗ {{ session('error') }}
+    </div>
+@endif
+
+
                 {{ $slot }}
             </main>
         </div>
