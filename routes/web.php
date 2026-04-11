@@ -1,9 +1,13 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
-// Rotta pubblica — pagina iniziale
+use App\Http\Controllers\MovimentoController;
+use App\Http\Controllers\SocioController;
+use App\Http\Controllers\VerbaleController;
+use Illuminate\Support\Facades\Route;
+
+// Rotta pubblica
 Route::get('/', function () {
     return view('welcome');
 });
@@ -12,17 +16,21 @@ Route::get('/', function () {
 Route::middleware('auth')->group(function () {
 
     // Dashboard
-   Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard');
 
-    // Profilo utente (già creato da Breeze)
+    // Profilo utente
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Rotte solo admin
     Route::middleware('isAdmin')->group(function () {
-        // Qui aggiungeremo le rotte per movimenti, soci, verbali
+        Route::resource('movimenti', MovimentoController::class);
+        Route::resource('soci', SocioController::class);
+        Route::resource('verbali', VerbaleController::class);
     });
+
 });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';
