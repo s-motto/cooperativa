@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class QuotaSociale extends Model
 {
+    protected $table = 'quote_sociali';
     protected $fillable = [
         'socio_id',
         'anno',
