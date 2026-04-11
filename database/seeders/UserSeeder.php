@@ -16,6 +16,7 @@ class UserSeeder extends Seeder
             'name'     => 'Admin Cooperativa',
             'email'    => 'admin@cooperativa.it',
             'password' => bcrypt('password'),
+            'ruolo'    => 'admin',
         ]);
     }
 }
