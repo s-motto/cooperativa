@@ -7,13 +7,6 @@ use App\Http\Controllers\SocioController;
 use App\Http\Controllers\VerbaleController;
 use Illuminate\Support\Facades\Route;
 
-// Registrazione pubblica disabilitata
-Route::get('register', function() {
-    abort(403, 'Registrazione non disponibile.');
-});
-Route::post('register', function() {
-    abort(403, 'Registrazione non disponibile.');
-});
 
 // Rotta pubblica
 Route::get('/', function () {
@@ -61,3 +54,11 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+// Registrazione pubblica disabilitata
+Route::get('register', function() {
+    abort(403, 'Registrazione non disponibile.');
+});
+Route::post('register', function() {
+    abort(403, 'Registrazione non disponibile.');
+});
