@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Socio;
 use Illuminate\Http\Request;
 
 class SocioController extends Controller
@@ -10,55 +10,63 @@ class SocioController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-        //
-    }
+{
+    $soci = Socio::orderBy('cognome')->paginate(20);
+    return view('soci.index', compact('soci'));
+}
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+public function create()
+{
+    return view('soci.create');
+}
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+public function store(Request $request)
+{
+    $request->validate([
+        'nome'            => 'required|string|max:255',
+        'cognome'         => 'required|string|max:255',
+        'codice_fiscale'  => 'nullable|string|max:16|unique:soci',
+        'email'           => 'nullable|email',
+        'telefono'        => 'nullable|string|max:20',
+        'data_ingresso'   => 'required|date',
+        'stato'           => 'required|in:attivo,sospeso,uscito',
+        'note'            => 'nullable|string',
+    ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+    Socio::create($request->all());
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
+    return redirect()->route('soci.index')
+        ->with('success', 'Socio aggiunto correttamente.');
+}
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+public function edit(Socio $socio)
+{
+    return view('soci.edit', compact('socio'));
+}
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
+public function update(Request $request, Socio $socio)
+{
+    $request->validate([
+        'nome'            => 'required|string|max:255',
+        'cognome'         => 'required|string|max:255',
+        'codice_fiscale'  => 'nullable|string|max:16|unique:soci,codice_fiscale,' . $socio->id,
+        'email'           => 'nullable|email',
+        'telefono'        => 'nullable|string|max:20',
+        'data_ingresso'   => 'required|date',
+        'stato'           => 'required|in:attivo,sospeso,uscito',
+        'note'            => 'nullable|string',
+    ]);
+
+    $socio->update($request->all());
+
+    return redirect()->route('soci.index')
+        ->with('success', 'Socio aggiornato correttamente.');
+}
+
+public function destroy(Socio $socio)
+{
+    $socio->delete();
+    return redirect()->route('soci.index')
+        ->with('success', 'Socio eliminato.');
+}
 }
