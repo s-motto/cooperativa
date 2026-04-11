@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Verbale extends Model
 {
+    protected $table = 'verbali';
     protected $fillable = [
         'data',
         'tipo',

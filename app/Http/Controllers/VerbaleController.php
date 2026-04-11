@@ -3,62 +3,66 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use App\Models\Verbale;
+use Illuminate\Support\Facades\Storage;
 class VerbaleController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        //
+   public function index()
+{
+    $verbali = Verbale::orderBy('data', 'desc')->paginate(20);
+    return view('verbali.index', compact('verbali'));
+}
+
+public function create()
+{
+    return view('verbali.create');
+}
+
+public function store(Request $request)
+{
+    $request->validate([
+        'data'      => 'required|date',
+        'tipo'      => 'required|in:assemblea,consiglio,straordinaria',
+        'oggetto'   => 'required|string|max:255',
+        'contenuto' => 'nullable|string',
+        'file'      => 'nullable|file|mimes:pdf|max:5120',
+    ]);
+
+    $file_path = null;
+
+    if ($request->hasFile('file')) {
+        $file_path = $request->file('file')->store('verbali', 'public');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+    Verbale::create([
+        'data'      => $request->data,
+        'tipo'      => $request->tipo,
+        'oggetto'   => $request->oggetto,
+        'contenuto' => $request->contenuto,
+        'file_path' => $file_path,
+        'user_id'   => auth()->id(),
+    ]);
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+    return redirect()->route('verbali.index')
+        ->with('success', 'Verbale salvato correttamente.');
+}
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+public function show(Verbale $verbale)
+{
+    return view('verbali.show', compact('verbale'));
+}
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
+public function destroy(Verbale $verbale)
+{
+    if ($verbale->file_path) {
+        \Storage::disk('public')->delete($verbale->file_path);
     }
+    $verbale->delete();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
+    return redirect()->route('verbali.index')
+        ->with('success', 'Verbale eliminato.');
+}
 }
