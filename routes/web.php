@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\DashboardController;
 // Rotta pubblica — pagina iniziale
 Route::get('/', function () {
     return view('welcome');
@@ -12,9 +12,7 @@ Route::get('/', function () {
 Route::middleware('auth')->group(function () {
 
     // Dashboard
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+   Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Profilo utente (già creato da Breeze)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
