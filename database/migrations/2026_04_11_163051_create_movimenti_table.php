@@ -20,7 +20,7 @@ return new class extends Migration
             $table->decimal('importo', 10, 2);
             $table->foreignId('categoria_id')
                 ->nullable()
-                ->constrained()
+                ->constrained('categorie')
                 ->nullOnDelete();
             $table->foreignId('user_id')
                 ->constrained()

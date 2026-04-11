@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('quote_sociali', function (Blueprint $table) {
             $table->id();
             $table->foreignId('socio_id')
-                ->constrained()
+                ->constrained('soci')
                 ->cascadeOnDelete();
             $table->integer('anno');
             $table->decimal('importo', 8, 2);
