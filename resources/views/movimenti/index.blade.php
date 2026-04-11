@@ -31,6 +31,60 @@
                 </div>
             </div>
 
+            {{-- Filtri --}}
+<form method="GET" action="{{ route('movimenti.index') }}" class="bg-white rounded-lg shadow p-4 mb-6">
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div>
+            <label class="block text-xs text-gray-500 mb-1">Tipo</label>
+            <select name="tipo" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                <option value="">Tutti</option>
+                <option value="entrata" {{ request('tipo') === 'entrata' ? 'selected' : '' }}>Entrate</option>
+                <option value="uscita" {{ request('tipo') === 'uscita' ? 'selected' : '' }}>Uscite</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs text-gray-500 mb-1">Conto</label>
+            <select name="conto" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                <option value="">Tutti</option>
+                <option value="cassa" {{ request('conto') === 'cassa' ? 'selected' : '' }}>Cassa</option>
+                <option value="banca" {{ request('conto') === 'banca' ? 'selected' : '' }}>Banca</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs text-gray-500 mb-1">Categoria</label>
+            <select name="categoria_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                <option value="">Tutte</option>
+                @foreach($categorie as $categoria)
+                    <option value="{{ $categoria->id }}"
+                        {{ request('categoria_id') == $categoria->id ? 'selected' : '' }}>
+                        {{ $categoria->nome }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs text-gray-500 mb-1">Dal</label>
+            <input type="date" name="da" value="{{ request('da') }}"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div>
+            <label class="block text-xs text-gray-500 mb-1">Al</label>
+            <input type="date" name="a" value="{{ request('a') }}"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        </div>
+    </div>
+    <div class="flex gap-3 mt-3">
+        <button type="submit"
+            style="background:#4f46e5;color:white;padding:6px 16px;border-radius:8px;border:none;cursor:pointer;font-size:0.875rem;">
+            Filtra
+        </button>
+        <a href="{{ route('movimenti.index') }}"
+           class="text-gray-500 hover:underline text-sm" style="padding:6px 0;">
+            Azzera filtri
+        </a>
+    </div>
+</form>
+
             {{-- Tabella movimenti --}}
             <div class="bg-white rounded-lg shadow overflow-hidden">
                 <table class="w-full text-sm">

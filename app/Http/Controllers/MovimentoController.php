@@ -11,19 +11,46 @@ class MovimentoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
 {
-    $movimenti = Movimento::with('categoria')
-        ->orderBy('data', 'desc')
-        ->paginate(20);
+    $query = Movimento::with('categoria')->orderBy('data', 'desc');
 
+    // Filtro per tipo
+    if ($request->tipo) {
+        $query->where('tipo', $request->tipo);
+    }
+
+    // Filtro per conto
+    if ($request->conto) {
+        $query->where('conto', $request->conto);
+    }
+
+    // Filtro per categoria
+    if ($request->categoria_id) {
+        $query->where('categoria_id', $request->categoria_id);
+    }
+
+    // Filtro per periodo
+    if ($request->da) {
+        $query->whereDate('data', '>=', $request->da);
+    }
+    if ($request->a) {
+        $query->whereDate('data', '<=', $request->a);
+    }
+
+    $movimenti = $query->paginate(20)->withQueryString();
+
+    // Saldi filtrati
     $saldo_cassa = Movimento::entrate()->cassa()->sum('importo')
                  - Movimento::uscite()->cassa()->sum('importo');
-
     $saldo_banca = Movimento::entrate()->banca()->sum('importo')
                  - Movimento::uscite()->banca()->sum('importo');
 
-    return view('movimenti.index', compact('movimenti', 'saldo_cassa', 'saldo_banca'));
+    $categorie = Categoria::orderBy('nome')->get();
+
+    return view('movimenti.index', compact(
+        'movimenti', 'saldo_cassa', 'saldo_banca', 'categorie'
+    ));
 }
 
     /**
