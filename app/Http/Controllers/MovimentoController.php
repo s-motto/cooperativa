@@ -75,24 +75,35 @@ class MovimentoController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
-    {
-        //
-    }
+ public function edit(Movimento $movimento)
+{
+    $categorie = Categoria::orderBy('nome')->get();
+    return view('movimenti.edit', compact('movimento', 'categorie'));
+}
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+public function update(Request $request, Movimento $movimento)
+{
+    $request->validate([
+        'data'         => 'required|date',
+        'descrizione'  => 'required|string|max:255',
+        'tipo'         => 'required|in:entrata,uscita',
+        'conto'        => 'required|in:cassa,banca',
+        'importo'      => 'required|numeric|min:0.01',
+        'categoria_id' => 'nullable|exists:categorie,id',
+        'note'         => 'nullable|string',
+    ]);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
+    $movimento->update($request->all());
+
+    return redirect()->route('movimenti.index')
+        ->with('success', 'Movimento aggiornato correttamente.');
+}
+
+public function destroy(Movimento $movimento)
+{
+    $movimento->delete();
+
+    return redirect()->route('movimenti.index')
+        ->with('success', 'Movimento eliminato.');
+}
 }

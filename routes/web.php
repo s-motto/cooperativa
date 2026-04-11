@@ -26,7 +26,8 @@ Route::middleware('auth')->group(function () {
 
     // Rotte solo admin
     Route::middleware('isAdmin')->group(function () {
-        Route::resource('movimenti', MovimentoController::class);
+        Route::resource('movimenti', MovimentoController::class)
+    ->parameters(['movimenti' => 'movimento']);
         Route::resource('soci', SocioController::class);
         Route::resource('verbali', VerbaleController::class);
     });
