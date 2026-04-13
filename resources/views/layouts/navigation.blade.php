@@ -24,7 +24,11 @@
     <x-nav-link :href="route('verbali.index')" :active="request()->routeIs('verbali.*')">
         Verbali
     </x-nav-link>
+    <x-nav-link :href="route('fatture.index')" :active="request()->routeIs('fatture.*')">
+        Fatture
+    </x-nav-link>
 </div>
+
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">

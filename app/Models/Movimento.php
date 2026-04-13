@@ -17,6 +17,7 @@ class Movimento extends Model
         'user_id',
         'allegato',
         'note',
+        'fattura_id',
     ];
 
     protected $casts = [
@@ -62,4 +63,9 @@ class Movimento extends Model
     {
         return $query->whereBetween('data', [$da, $a]);
     }
+
+    public function fattura()
+{
+    return $this->belongsTo(Fattura::class);
+}
 }

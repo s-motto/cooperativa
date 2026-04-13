@@ -48,6 +48,14 @@ Route::middleware('auth')->group(function () {
 
         Route::post('utenti', [App\Http\Controllers\UtenteController::class, 'store'])
             ->name('utenti.store');
+        
+            Route::get('fatture/{fattura}/pagamento', [App\Http\Controllers\FatturaController::class, 'pagamento'])
+            ->name('fatture.pagamento');
+        Route::post('fatture/{fattura}/pagamento', [App\Http\Controllers\FatturaController::class, 'storePagamento'])
+            ->name('fatture.pagamento.store');
+        Route::resource('fatture', App\Http\Controllers\FatturaController::class)
+            ->parameters(['fatture' => 'fattura'])
+            ->except(['edit', 'update']);
 
     });
 
