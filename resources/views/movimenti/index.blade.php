@@ -85,7 +85,7 @@
                 </div>
             </form>
 
-            {{-- Tabella unica movimenti + fatture --}}
+            {{-- Tabella --}}
             <div class="bg-white rounded-lg shadow overflow-hidden">
                 <table class="w-full text-sm">
                     <thead class="bg-gray-50 border-b border-gray-200">
@@ -100,7 +100,7 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @forelse($righe as $riga)
-                            <tr class="hover:bg-gray-50 {{ $riga->tipo_record === 'fattura' ? 'bg-amber-50' : '' }}">
+                            <tr class="hover:bg-gray-50 {{ $riga->tipo_record === 'fattura' ? ($riga->stato === 'aperta' ? 'bg-amber-50' : 'bg-green-50') : '' }}">
                                 <td class="px-4 py-3 text-gray-600">
                                     {{ $riga->data->format('d/m/Y') }}
                                 </td>
@@ -108,9 +108,15 @@
                                     {{ $riga->descrizione }}
                                     @if($riga->tipo_record === 'fattura')
                                         <span class="text-gray-400 text-xs ml-1">— {{ $riga->controparte }}</span>
-                                        <span style="margin-left:6px;padding:1px 7px;border-radius:999px;font-size:0.7rem;background:#fef3c7;color:#92400e;">
-                                            ⏳ da pagare{{ $riga->isScaduta ? ' ⚠ scaduta' : '' }}
-                                        </span>
+                                        @if($riga->stato === 'aperta')
+                                            <span style="margin-left:6px;padding:1px 7px;border-radius:999px;font-size:0.7rem;background:#fef3c7;color:#92400e;">
+                                                ⏳ da pagare{{ $riga->isScaduta ? ' ⚠ scaduta' : '' }}
+                                            </span>
+                                        @else
+                                            <span style="margin-left:6px;padding:1px 7px;border-radius:999px;font-size:0.7rem;background:#dcfce7;color:#166534;">
+                                                ✓ pagata
+                                            </span>
+                                        @endif
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 text-gray-500">
@@ -133,10 +139,15 @@
                                 </td>
                                 <td class="px-4 py-3 text-right">
                                     @if($riga->tipo_record === 'fattura')
-                                        <a href="{{ route('fatture.pagamento', $riga->fattura_id) }}"
-                                           style="background:#4f46e5;color:white;padding:3px 10px;border-radius:6px;font-size:0.75rem;text-decoration:none;">
-                                            Paga
-                                        </a>
+                                        @if($riga->stato === 'aperta')
+                                            <a href="{{ route('fatture.pagamento', $riga->fattura_id) }}"
+                                               style="background:#4f46e5;color:white;padding:3px 10px;border-radius:6px;font-size:0.75rem;text-decoration:none;">
+                                                Paga
+                                            </a>
+                                        @else
+                                            <a href="{{ route('fatture.show', $riga->fattura_id) }}"
+                                               class="text-indigo-600 hover:underline text-xs">Dettaglio</a>
+                                        @endif
                                     @else
                                         <a href="{{ route('movimenti.edit', $riga->movimento_id) }}"
                                            class="text-indigo-600 hover:underline text-xs">Modifica</a>

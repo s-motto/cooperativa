@@ -29,7 +29,6 @@ class MovimentoController extends Controller
         $categorie = Categoria::orderBy('nome')->get();
 
         $fatture = \App\Models\Fattura::with('categoria')
-            ->where('stato', 'aperta')
             ->when($request->da, fn($q) => $q->whereDate('data', '>=', $request->da))
             ->when($request->a, fn($q) => $q->whereDate('data', '<=', $request->a))
             ->get()
@@ -43,6 +42,7 @@ class MovimentoController extends Controller
                 'importo'      => $f->importo,
                 'categoria'    => $f->categoria,
                 'isScaduta'    => $f->isScaduta(),
+                'stato'        => $f->stato,
                 'fattura_id'   => $f->id,
                 'movimento_id' => null,
             ]);
@@ -57,6 +57,7 @@ class MovimentoController extends Controller
                 'importo'      => $m->importo,
                 'categoria'    => $m->categoria,
                 'isScaduta'    => false,
+                'stato'        => null,
                 'fattura_id'   => null,
                 'movimento_id' => $m->id,
             ])
