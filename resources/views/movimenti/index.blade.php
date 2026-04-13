@@ -31,6 +31,51 @@
                 </div>
             </div>
 
+            {{-- Fatture in attesa --}}
+@if($fatture_aperte->count() > 0)
+<div class="bg-amber-50 border border-amber-200 rounded-lg shadow mb-6 overflow-hidden">
+    <div class="px-4 py-3 border-b border-amber-200 flex justify-between items-center">
+        <h3 class="font-semibold text-amber-800 text-sm">⏳ Fatture in attesa di pagamento</h3>
+        <a href="{{ route('fatture.index') }}" class="text-amber-700 hover:underline text-xs">Gestisci →</a>
+    </div>
+    <table class="w-full text-sm">
+        <tbody class="divide-y divide-amber-100">
+            @foreach($fatture_aperte as $fattura)
+                <tr class="hover:bg-amber-100">
+                    <td class="px-4 py-3 text-gray-600 w-32">{{ $fattura->data->format('d/m/Y') }}</td>
+                    <td class="px-4 py-3 font-medium text-gray-800">
+                        {{ $fattura->descrizione }}
+                        <span class="text-gray-400 text-xs ml-1">— {{ $fattura->controparte }}</span>
+                    </td>
+                    <td class="px-4 py-3 text-gray-500">{{ $fattura->categoria?->nome ?? '—' }}</td>
+                    <td class="px-4 py-3">
+                        <span style="padding:2px 8px;border-radius:999px;font-size:0.7rem;
+                            background:{{ $fattura->tipo === 'attiva' ? '#dcfce7' : '#fee2e2' }};
+                            color:{{ $fattura->tipo === 'attiva' ? '#166534' : '#991b1b' }};">
+                            {{ $fattura->tipo === 'attiva' ? 'Attiva' : 'Passiva' }}
+                        </span>
+                        @if($fattura->isScaduta())
+                            <span style="padding:2px 8px;border-radius:999px;font-size:0.7rem;background:#fee2e2;color:#991b1b;">⚠ scaduta</span>
+                        @endif
+                    </td>
+                    <td class="px-4 py-3 text-right font-semibold
+                        {{ $fattura->tipo === 'attiva' ? 'text-green-600' : 'text-red-600' }}">
+                        {{ $fattura->tipo === 'attiva' ? '+' : '-' }}
+                        € {{ number_format($fattura->importo, 2, ',', '.') }}
+                    </td>
+                    <td class="px-4 py-3 text-right">
+                        <a href="{{ route('fatture.pagamento', $fattura) }}"
+                           style="background:#4f46e5;color:white;padding:3px 10px;border-radius:6px;font-size:0.75rem;text-decoration:none;">
+                            Paga
+                        </a>
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+</div>
+@endif
+
             {{-- Filtri --}}
 <form method="GET" action="{{ route('movimenti.index') }}" class="bg-white rounded-lg shadow p-4 mb-6">
     <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
