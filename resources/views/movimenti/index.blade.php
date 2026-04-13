@@ -1,15 +1,15 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex gap-3">
-    <a href="{{ route('movimenti.export') }}"
-       style="background:#16a34a;color:white;padding:8px 16px;border-radius:8px;font-size:0.875rem;text-decoration:none;">
-        ↓ Esporta Excel
-    </a>
-    <a href="{{ route('movimenti.create') }}"
-       style="background:#4f46e5;color:white;padding:8px 16px;border-radius:8px;font-size:0.875rem;text-decoration:none;">
-        + Nuovo movimento
-    </a>
-</div>
+            <a href="{{ route('movimenti.export') }}"
+               style="background:#16a34a;color:white;padding:8px 16px;border-radius:8px;font-size:0.875rem;text-decoration:none;">
+                ↓ Esporta Excel
+            </a>
+            <a href="{{ route('movimenti.create') }}"
+               style="background:#4f46e5;color:white;padding:8px 16px;border-radius:8px;font-size:0.875rem;text-decoration:none;">
+                + Nuovo movimento
+            </a>
+        </div>
     </x-slot>
 
     <div class="py-12">
@@ -31,106 +31,61 @@
                 </div>
             </div>
 
-            {{-- Fatture in attesa --}}
-@if($fatture_aperte->count() > 0)
-<div class="bg-amber-50 border border-amber-200 rounded-lg shadow mb-6 overflow-hidden">
-    <div class="px-4 py-3 border-b border-amber-200 flex justify-between items-center">
-        <h3 class="font-semibold text-amber-800 text-sm">⏳ Fatture in attesa di pagamento</h3>
-        <a href="{{ route('fatture.index') }}" class="text-amber-700 hover:underline text-xs">Gestisci →</a>
-    </div>
-    <table class="w-full text-sm">
-        <tbody class="divide-y divide-amber-100">
-            @foreach($fatture_aperte as $fattura)
-                <tr class="hover:bg-amber-100">
-                    <td class="px-4 py-3 text-gray-600 w-32">{{ $fattura->data->format('d/m/Y') }}</td>
-                    <td class="px-4 py-3 font-medium text-gray-800">
-                        {{ $fattura->descrizione }}
-                        <span class="text-gray-400 text-xs ml-1">— {{ $fattura->controparte }}</span>
-                    </td>
-                    <td class="px-4 py-3 text-gray-500">{{ $fattura->categoria?->nome ?? '—' }}</td>
-                    <td class="px-4 py-3">
-                        <span style="padding:2px 8px;border-radius:999px;font-size:0.7rem;
-                            background:{{ $fattura->tipo === 'attiva' ? '#dcfce7' : '#fee2e2' }};
-                            color:{{ $fattura->tipo === 'attiva' ? '#166534' : '#991b1b' }};">
-                            {{ $fattura->tipo === 'attiva' ? 'Attiva' : 'Passiva' }}
-                        </span>
-                        @if($fattura->isScaduta())
-                            <span style="padding:2px 8px;border-radius:999px;font-size:0.7rem;background:#fee2e2;color:#991b1b;">⚠ scaduta</span>
-                        @endif
-                    </td>
-                    <td class="px-4 py-3 text-right font-semibold
-                        {{ $fattura->tipo === 'attiva' ? 'text-green-600' : 'text-red-600' }}">
-                        {{ $fattura->tipo === 'attiva' ? '+' : '-' }}
-                        € {{ number_format($fattura->importo, 2, ',', '.') }}
-                    </td>
-                    <td class="px-4 py-3 text-right">
-                        <a href="{{ route('fatture.pagamento', $fattura) }}"
-                           style="background:#4f46e5;color:white;padding:3px 10px;border-radius:6px;font-size:0.75rem;text-decoration:none;">
-                            Paga
-                        </a>
-                    </td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-</div>
-@endif
-
             {{-- Filtri --}}
-<form method="GET" action="{{ route('movimenti.index') }}" class="bg-white rounded-lg shadow p-4 mb-6">
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <div>
-            <label class="block text-xs text-gray-500 mb-1">Tipo</label>
-            <select name="tipo" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                <option value="">Tutti</option>
-                <option value="entrata" {{ request('tipo') === 'entrata' ? 'selected' : '' }}>Entrate</option>
-                <option value="uscita" {{ request('tipo') === 'uscita' ? 'selected' : '' }}>Uscite</option>
-            </select>
-        </div>
-        <div>
-            <label class="block text-xs text-gray-500 mb-1">Conto</label>
-            <select name="conto" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                <option value="">Tutti</option>
-                <option value="cassa" {{ request('conto') === 'cassa' ? 'selected' : '' }}>Cassa</option>
-                <option value="banca" {{ request('conto') === 'banca' ? 'selected' : '' }}>Banca</option>
-            </select>
-        </div>
-        <div>
-            <label class="block text-xs text-gray-500 mb-1">Categoria</label>
-            <select name="categoria_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                <option value="">Tutte</option>
-                @foreach($categorie as $categoria)
-                    <option value="{{ $categoria->id }}"
-                        {{ request('categoria_id') == $categoria->id ? 'selected' : '' }}>
-                        {{ $categoria->nome }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        <div>
-            <label class="block text-xs text-gray-500 mb-1">Dal</label>
-            <input type="date" name="da" value="{{ request('da') }}"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-        </div>
-        <div>
-            <label class="block text-xs text-gray-500 mb-1">Al</label>
-            <input type="date" name="a" value="{{ request('a') }}"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-        </div>
-    </div>
-    <div class="flex gap-3 mt-3">
-        <button type="submit"
-            style="background:#4f46e5;color:white;padding:6px 16px;border-radius:8px;border:none;cursor:pointer;font-size:0.875rem;">
-            Filtra
-        </button>
-        <a href="{{ route('movimenti.index') }}"
-           class="text-gray-500 hover:underline text-sm" style="padding:6px 0;">
-            Azzera filtri
-        </a>
-    </div>
-</form>
+            <form method="GET" action="{{ route('movimenti.index') }}" class="bg-white rounded-lg shadow p-4 mb-6">
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">Tipo</label>
+                        <select name="tipo" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                            <option value="">Tutti</option>
+                            <option value="entrata" {{ request('tipo') === 'entrata' ? 'selected' : '' }}>Entrate</option>
+                            <option value="uscita" {{ request('tipo') === 'uscita' ? 'selected' : '' }}>Uscite</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">Conto</label>
+                        <select name="conto" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                            <option value="">Tutti</option>
+                            <option value="cassa" {{ request('conto') === 'cassa' ? 'selected' : '' }}>Cassa</option>
+                            <option value="banca" {{ request('conto') === 'banca' ? 'selected' : '' }}>Banca</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">Categoria</label>
+                        <select name="categoria_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                            <option value="">Tutte</option>
+                            @foreach($categorie as $categoria)
+                                <option value="{{ $categoria->id }}"
+                                    {{ request('categoria_id') == $categoria->id ? 'selected' : '' }}>
+                                    {{ $categoria->nome }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">Dal</label>
+                        <input type="date" name="da" value="{{ request('da') }}"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">Al</label>
+                        <input type="date" name="a" value="{{ request('a') }}"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                    </div>
+                </div>
+                <div class="flex gap-3 mt-3">
+                    <button type="submit"
+                        style="background:#4f46e5;color:white;padding:6px 16px;border-radius:8px;border:none;cursor:pointer;font-size:0.875rem;">
+                        Filtra
+                    </button>
+                    <a href="{{ route('movimenti.index') }}"
+                       class="text-gray-500 hover:underline text-sm" style="padding:6px 0;">
+                        Azzera filtri
+                    </a>
+                </div>
+            </form>
 
-            {{-- Tabella movimenti --}}
+            {{-- Tabella unica movimenti + fatture --}}
             <div class="bg-white rounded-lg shadow overflow-hidden">
                 <table class="w-full text-sm">
                     <thead class="bg-gray-50 border-b border-gray-200">
@@ -144,31 +99,48 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        @forelse($movimenti as $movimento)
-                            <tr class="hover:bg-gray-50">
+                        @forelse($righe as $riga)
+                            <tr class="hover:bg-gray-50 {{ $riga->tipo_record === 'fattura' ? 'bg-amber-50' : '' }}">
                                 <td class="px-4 py-3 text-gray-600">
-                                    {{ $movimento->data->format('d/m/Y') }}
+                                    {{ $riga->data->format('d/m/Y') }}
                                 </td>
                                 <td class="px-4 py-3 font-medium text-gray-800">
-                                    {{ $movimento->descrizione }}
+                                    {{ $riga->descrizione }}
+                                    @if($riga->tipo_record === 'fattura')
+                                        <span class="text-gray-400 text-xs ml-1">— {{ $riga->controparte }}</span>
+                                        <span style="margin-left:6px;padding:1px 7px;border-radius:999px;font-size:0.7rem;background:#fef3c7;color:#92400e;">
+                                            ⏳ da pagare{{ $riga->isScaduta ? ' ⚠ scaduta' : '' }}
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="px-4 py-3 text-gray-500">
-                                    {{ $movimento->categoria?->nome ?? '—' }}
+                                    {{ $riga->categoria?->nome ?? '—' }}
                                 </td>
                                 <td class="px-4 py-3">
-                                    <span class="px-2 py-1 rounded-full text-xs
-                                        {{ $movimento->conto === 'cassa' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800' }}">
-                                        {{ ucfirst($movimento->conto) }}
-                                    </span>
+                                    @if($riga->conto)
+                                        <span class="px-2 py-1 rounded-full text-xs
+                                            {{ $riga->conto === 'cassa' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800' }}">
+                                            {{ ucfirst($riga->conto) }}
+                                        </span>
+                                    @else
+                                        <span class="text-gray-400 text-xs">—</span>
+                                    @endif
                                 </td>
                                 <td class="px-4 py-3 text-right font-semibold
-                                    {{ $movimento->tipo === 'entrata' ? 'text-green-600' : 'text-red-600' }}">
-                                    {{ $movimento->tipo === 'entrata' ? '+' : '-' }}
-                                    € {{ number_format($movimento->importo, 2, ',', '.') }}
+                                    {{ $riga->tipo === 'entrata' ? 'text-green-600' : 'text-red-600' }}">
+                                    {{ $riga->tipo === 'entrata' ? '+' : '-' }}
+                                    € {{ number_format($riga->importo, 2, ',', '.') }}
                                 </td>
                                 <td class="px-4 py-3 text-right">
-                                    <a href="{{ route('movimenti.edit', $movimento) }}"
-                                       class="text-indigo-600 hover:underline text-xs">Modifica</a>
+                                    @if($riga->tipo_record === 'fattura')
+                                        <a href="{{ route('fatture.pagamento', $riga->fattura_id) }}"
+                                           style="background:#4f46e5;color:white;padding:3px 10px;border-radius:6px;font-size:0.75rem;text-decoration:none;">
+                                            Paga
+                                        </a>
+                                    @else
+                                        <a href="{{ route('movimenti.edit', $riga->movimento_id) }}"
+                                           class="text-indigo-600 hover:underline text-xs">Modifica</a>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
@@ -181,10 +153,9 @@
                     </tbody>
                 </table>
 
-                {{-- Paginazione --}}
-                @if($movimenti->hasPages())
+                @if($righe->hasPages())
                     <div class="px-4 py-3 border-t border-gray-100">
-                        {{ $movimenti->links() }}
+                        {{ $righe->links() }}
                     </div>
                 @endif
             </div>
