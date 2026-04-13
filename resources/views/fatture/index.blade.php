@@ -48,13 +48,17 @@
                                     {{ $fattura->tipo === 'attiva' ? 'text-green-600' : 'text-red-600' }}">
                                     € {{ number_format($fattura->importo, 2, ',', '.') }}
                                 </td>
-                                <td class="px-4 py-3 text-right flex gap-2 justify-end">
-                                    <a href="{{ route('fatture.show', $fattura) }}"
-                                       class="text-indigo-600 hover:underline text-xs">Dettaglio</a>
-                                    <a href="{{ route('fatture.pagamento', $fattura) }}"
-                                       style="background:#4f46e5;color:white;padding:3px 10px;border-radius:6px;font-size:0.75rem;text-decoration:none;">
-                                        Registra pagamento
-                                    </a>
+                                <td class="px-4 py-3 text-right">
+                                    <div class="flex gap-2 justify-end">
+                                        <a href="{{ route('fatture.edit', $fattura) }}"
+                                           class="text-indigo-600 hover:underline text-xs">Modifica</a>
+                                        <a href="{{ route('fatture.show', $fattura) }}"
+                                           class="text-gray-500 hover:underline text-xs">Dettaglio</a>
+                                        <a href="{{ route('fatture.pagamento', $fattura) }}"
+                                           style="background:#4f46e5;color:white;padding:3px 10px;border-radius:6px;font-size:0.75rem;text-decoration:none;">
+                                            Registra pagamento
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
@@ -99,8 +103,12 @@
                                     € {{ number_format($fattura->importo, 2, ',', '.') }}
                                 </td>
                                 <td class="px-4 py-3 text-right">
-                                    <a href="{{ route('fatture.show', $fattura) }}"
-                                       class="text-indigo-600 hover:underline text-xs">Dettaglio</a>
+                                    <div class="flex gap-2 justify-end">
+                                        <a href="{{ route('fatture.edit', $fattura) }}"
+                                           class="text-indigo-600 hover:underline text-xs">Modifica</a>
+                                        <a href="{{ route('fatture.show', $fattura) }}"
+                                           class="text-gray-500 hover:underline text-xs">Dettaglio</a>
+                                    </div>
                                 </td>
                             </tr>
                         @empty

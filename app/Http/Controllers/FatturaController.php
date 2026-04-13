@@ -11,8 +11,8 @@ class FatturaController extends Controller
 {
     public function index()
     {
-        $aperte  = Fattura::with('categoria')->where('stato', 'aperta')->orderBy('data_scadenza')->get();
-        $pagate  = Fattura::with('categoria')->where('stato', 'pagata')->orderByDesc('data')->paginate(20);
+        $aperte = Fattura::with('categoria')->where('stato', 'aperta')->orderBy('data_scadenza')->get();
+        $pagate = Fattura::with('categoria')->where('stato', 'pagata')->orderByDesc('data')->paginate(20);
         return view('fatture.index', compact('aperte', 'pagate'));
     }
 
@@ -63,6 +63,40 @@ class FatturaController extends Controller
         return view('fatture.show', compact('fattura'));
     }
 
+    public function edit(Fattura $fattura)
+    {
+        $categorie = Categoria::orderBy('nome')->get();
+        return view('fatture.edit', compact('fattura', 'categorie'));
+    }
+
+    public function update(Request $request, Fattura $fattura)
+    {
+        $request->validate([
+            'data'          => 'required|date',
+            'data_scadenza' => 'nullable|date',
+            'tipo'          => 'required|in:attiva,passiva',
+            'controparte'   => 'required|string|max:255',
+            'importo'       => 'required|numeric|min:0.01',
+            'descrizione'   => 'required|string|max:255',
+            'numero'        => 'nullable|string|max:50',
+            'categoria_id'  => 'nullable|exists:categorie,id',
+            'stato'         => 'required|in:aperta,pagata',
+        ]);
+
+        // Se si riapre una fattura pagata, elimina il movimento collegato
+        if ($request->stato === 'aperta' && $fattura->stato === 'pagata') {
+            $fattura->movimento()->delete();
+        }
+
+        $fattura->update($request->only([
+            'data', 'data_scadenza', 'tipo', 'controparte',
+            'importo', 'descrizione', 'numero', 'categoria_id', 'stato'
+        ]));
+
+        return redirect()->route('fatture.index')
+            ->with('success', 'Fattura aggiornata correttamente.');
+    }
+
     public function pagamento(Fattura $fattura)
     {
         $categorie = Categoria::orderBy('nome')->get();
@@ -78,7 +112,7 @@ class FatturaController extends Controller
             'note'         => 'nullable|string',
         ]);
 
-        $movimento = Movimento::create([
+        Movimento::create([
             'data'         => $request->data,
             'descrizione'  => 'Pagamento fattura: ' . $fattura->descrizione . ' — ' . $fattura->controparte,
             'tipo'         => $fattura->tipo === 'passiva' ? 'uscita' : 'entrata',
