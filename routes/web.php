@@ -57,6 +57,11 @@ Route::middleware('auth')->group(function () {
             ->parameters(['fatture' => 'fattura'])
             ->except(['edit', 'update']);
 
+            Route::get('saldi-apertura', [App\Http\Controllers\SaldoAperturaController::class, 'create'])
+            ->name('saldi-apertura.create');
+        Route::post('saldi-apertura', [App\Http\Controllers\SaldoAperturaController::class, 'store'])
+            ->name('saldi-apertura.store');
+
     });
 
 });
