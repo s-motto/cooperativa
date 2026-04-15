@@ -9,7 +9,7 @@ Costruita con Laravel 13, PHP 8.3, MySQL e Tailwind CSS.
 ## Funzionalità
 
 - **Prima Nota** — registro unificato di entrate, uscite e fatture, ordinato per data. Filtri per tipo, conto, categoria e periodo. Export in Excel con colonne separate per cassa e banca, saldo progressivo e fatture in evidenza.
-- **Fatture** — gestione fatture attive (da incassare) e passive (da pagare), con allegato PDF, data di scadenza e stato (aperta/pagata). Le fatture aperte appaiono direttamente nella prima nota con badge visivo. Il pagamento genera automaticamente il movimento contabile collegato.
+- **Fatture** — gestione fatture attive (da incassare) e passive (da pagare), con allegato PDF, data di scadenza e stato (aperta/parziale/pagata). Supporto a pagamenti parziali con metodi diversi (cassa/banca): ogni acconto genera un movimento in prima nota e aggiorna automaticamente il residuo. Le fatture appaiono direttamente nella prima nota con badge visivo.
 - **Saldi di apertura** — inserimento del saldo iniziale di cassa e banca, con supporto a valori negativi.
 - **Soci** — anagrafica soci con storico quote annuali. La registrazione di una quota genera automaticamente un movimento nella prima nota.
 - **Verbali** — archivio verbali di assemblea e consiglio, con possibilità di allegare PDF.
