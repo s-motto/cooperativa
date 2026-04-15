@@ -37,15 +37,37 @@ class Fattura extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function movimento()
+    public function movimenti()
     {
-        return $this->hasOne(Movimento::class);
+        return $this->hasMany(Movimento::class);
+    }
+
+    public function totalePagato(): float
+    {
+        return (float) $this->movimenti()->sum('importo');
+    }
+
+    public function residuo(): float
+    {
+        return (float) $this->importo - $this->totalePagato();
     }
 
     public function isScaduta(): bool
     {
-        return $this->stato === 'aperta'
+        return $this->stato !== 'pagata'
             && $this->data_scadenza
             && $this->data_scadenza->isPast();
+    }
+
+    public function aggiornaStato(): void
+    {
+        $residuo = $this->residuo();
+        if ($residuo <= 0) {
+            $this->update(['stato' => 'pagata']);
+        } elseif ($this->totalePagato() > 0) {
+            $this->update(['stato' => 'parziale']);
+        } else {
+            $this->update(['stato' => 'aperta']);
+        }
     }
 }
