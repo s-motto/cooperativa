@@ -12,7 +12,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
-            {{-- Fatture aperte --}}
+            {{-- Fatture aperte/parziali --}}
             <h3 class="font-semibold text-gray-700 mb-3">In attesa di pagamento</h3>
             <div class="bg-white rounded-lg shadow overflow-hidden mb-8">
                 <table class="w-full text-sm">
@@ -23,13 +23,14 @@
                             <th class="px-4 py-3 text-left text-gray-600">Controparte</th>
                             <th class="px-4 py-3 text-left text-gray-600">Tipo</th>
                             <th class="px-4 py-3 text-left text-gray-600">Scadenza</th>
-                            <th class="px-4 py-3 text-right text-gray-600">Importo</th>
+                            <th class="px-4 py-3 text-right text-gray-600">Totale</th>
+                            <th class="px-4 py-3 text-right text-gray-600">Residuo</th>
                             <th class="px-4 py-3"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @forelse($aperte as $fattura)
-                            <tr class="{{ $fattura->isScaduta() ? 'bg-red-50' : '' }} hover:bg-gray-50">
+                            <tr class="{{ $fattura->isScaduta() ? 'bg-red-50' : ($fattura->stato === 'parziale' ? 'bg-orange-50' : '') }} hover:bg-gray-50">
                                 <td class="px-4 py-3 text-gray-600">{{ $fattura->data->format('d/m/Y') }}</td>
                                 <td class="px-4 py-3 text-gray-500">{{ $fattura->numero ?? '—' }}</td>
                                 <td class="px-4 py-3 font-medium text-gray-800">{{ $fattura->controparte }}</td>
@@ -39,14 +40,22 @@
                                         color:{{ $fattura->tipo === 'attiva' ? '#166534' : '#991b1b' }};">
                                         {{ $fattura->tipo === 'attiva' ? 'Attiva' : 'Passiva' }}
                                     </span>
+                                    @if($fattura->stato === 'parziale')
+                                        <span style="margin-left:4px;padding:2px 8px;border-radius:999px;font-size:0.7rem;background:#fed7aa;color:#9a3412;">
+                                            🔶 parziale
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="px-4 py-3 {{ $fattura->isScaduta() ? 'text-red-600 font-semibold' : 'text-gray-500' }}">
                                     {{ $fattura->data_scadenza?->format('d/m/Y') ?? '—' }}
                                     @if($fattura->isScaduta()) ⚠ @endif
                                 </td>
+                                <td class="px-4 py-3 text-right text-gray-500">
+                                    € {{ number_format($fattura->importo, 2, ',', '.') }}
+                                </td>
                                 <td class="px-4 py-3 text-right font-semibold
                                     {{ $fattura->tipo === 'attiva' ? 'text-green-600' : 'text-red-600' }}">
-                                    € {{ number_format($fattura->importo, 2, ',', '.') }}
+                                    € {{ number_format($fattura->residuo(), 2, ',', '.') }}
                                 </td>
                                 <td class="px-4 py-3 text-right">
                                     <div class="flex gap-2 justify-end">
@@ -56,14 +65,14 @@
                                            class="text-gray-500 hover:underline text-xs">Dettaglio</a>
                                         <a href="{{ route('fatture.pagamento', $fattura) }}"
                                            style="background:#4f46e5;color:white;padding:3px 10px;border-radius:6px;font-size:0.75rem;text-decoration:none;">
-                                            Registra pagamento
+                                            Paga
                                         </a>
                                     </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-4 py-8 text-center text-gray-400">
+                                <td colspan="8" class="px-4 py-8 text-center text-gray-400">
                                     Nessuna fattura in attesa.
                                 </td>
                             </tr>

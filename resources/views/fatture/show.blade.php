@@ -10,7 +10,7 @@
                         📄 PDF
                     </a>
                 @endif
-                @if($fattura->stato === 'aperta')
+                @if($fattura->stato !== 'pagata')
                     <a href="{{ route('fatture.pagamento', $fattura) }}"
                        style="background:#16a34a;color:white;padding:8px 16px;border-radius:8px;font-size:0.875rem;text-decoration:none;">
                         Registra pagamento
@@ -31,11 +31,17 @@
     <div class="py-12">
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white rounded-lg shadow p-6">
-                <dl class="grid grid-cols-2 gap-4 text-sm">
+
+                <dl class="grid grid-cols-2 gap-4 text-sm mb-6">
                     <div><dt class="text-gray-500">Tipo</dt>
                         <dd class="font-medium mt-1">{{ $fattura->tipo === 'attiva' ? '🟢 Attiva' : '🔴 Passiva' }}</dd></div>
                     <div><dt class="text-gray-500">Stato</dt>
-                        <dd class="font-medium mt-1">{{ $fattura->stato === 'aperta' ? '⏳ Aperta' : '✅ Pagata' }}</dd></div>
+                        <dd class="font-medium mt-1">
+                            @if($fattura->stato === 'aperta') ⏳ Aperta
+                            @elseif($fattura->stato === 'parziale') 🔶 Parzialmente pagata
+                            @else ✅ Pagata
+                            @endif
+                        </dd></div>
                     <div><dt class="text-gray-500">Controparte</dt>
                         <dd class="font-medium mt-1">{{ $fattura->controparte }}</dd></div>
                     <div><dt class="text-gray-500">Numero</dt>
@@ -47,22 +53,48 @@
                             {{ $fattura->data_scadenza?->format('d/m/Y') ?? '—' }}
                             @if($fattura->isScaduta()) ⚠ scaduta @endif
                         </dd></div>
-                    <div><dt class="text-gray-500">Importo</dt>
+                    <div><dt class="text-gray-500">Importo totale</dt>
                         <dd class="font-bold text-lg mt-1 {{ $fattura->tipo === 'attiva' ? 'text-green-600' : 'text-red-600' }}">
                             € {{ number_format($fattura->importo, 2, ',', '.') }}
                         </dd></div>
-                    <div><dt class="text-gray-500">Categoria</dt>
-                        <dd class="font-medium mt-1">{{ $fattura->categoria?->nome ?? '—' }}</dd></div>
+                    <div><dt class="text-gray-500">Residuo</dt>
+                        <dd class="font-bold text-lg mt-1 {{ $fattura->residuo() > 0 ? 'text-orange-500' : 'text-green-600' }}">
+                            € {{ number_format($fattura->residuo(), 2, ',', '.') }}
+                        </dd></div>
                 </dl>
 
-                @if($fattura->movimento)
-                    <div class="mt-6 p-4 bg-green-50 rounded-lg border border-green-200 text-sm">
-                        <p class="font-semibold text-green-800 mb-1">✅ Pagamento registrato</p>
-                        <p class="text-green-700">{{ $fattura->movimento->data->format('d/m/Y') }} —
-                            {{ ucfirst($fattura->movimento->conto) }} —
-                            € {{ number_format($fattura->movimento->importo, 2, ',', '.') }}</p>
+                {{-- Storico pagamenti --}}
+                @if($fattura->movimenti->count() > 0)
+                    <div class="border-t border-gray-100 pt-4">
+                        <h3 class="font-semibold text-gray-700 mb-3 text-sm">Pagamenti registrati</h3>
+                        <div class="divide-y divide-gray-100">
+                            @foreach($fattura->movimenti as $m)
+                                <div class="py-2 flex justify-between text-sm">
+                                    <div>
+                                        <span class="text-gray-600">{{ $m->data->format('d/m/Y') }}</span>
+                                        <span class="ml-2">
+                                            <span class="px-2 py-0.5 rounded-full text-xs
+                                                {{ $m->conto === 'cassa' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800' }}">
+                                                {{ ucfirst($m->conto) }}
+                                            </span>
+                                        </span>
+                                        @if($m->note)
+                                            <span class="text-gray-400 text-xs ml-2">{{ $m->note }}</span>
+                                        @endif
+                                    </div>
+                                    <span class="font-semibold text-gray-800">
+                                        € {{ number_format($m->importo, 2, ',', '.') }}
+                                    </span>
+                                </div>
+                            @endforeach
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-200 flex justify-between text-sm">
+                            <span class="font-semibold text-gray-700">Totale pagato</span>
+                            <span class="font-bold text-green-600">€ {{ number_format($fattura->totalePagato(), 2, ',', '.') }}</span>
+                        </div>
                     </div>
                 @endif
+
             </div>
         </div>
     </div>
