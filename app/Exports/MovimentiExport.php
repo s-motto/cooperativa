@@ -47,7 +47,7 @@ class MovimentiExport implements FromArray, WithEvents, WithTitle
                     $titolo .= ' dal ' . \Carbon\Carbon::parse($this->da)->format('d/m/Y')
                              . ' al ' . \Carbon\Carbon::parse($this->a)->format('d/m/Y');
                 }
-                $sheet->mergeCells('A1:J1');
+                $sheet->mergeCells('A1:K1');
                 $sheet->setCellValue('A1', $titolo);
                 $sheet->getStyle('A1')->applyFromArray([
                     'font'      => ['bold' => true, 'size' => 13],
@@ -68,7 +68,7 @@ class MovimentiExport implements FromArray, WithEvents, WithTitle
                 ]);
 
                 // --- Riga 3: intestazioni ---
-                $headers = ['DATA', 'CLIENTE/FORNITORE', 'DESCRIZIONE', '', 'ENTRATE', 'USCITE', 'SALDO', 'ENTRATE', 'USCITE', 'SALDO'];
+                $headers = ['DATA', 'CLIENTE/FORNITORE', 'DESCRIZIONE', 'STATO', 'ENTRATE', 'USCITE', 'SALDO', 'ENTRATE', 'USCITE', 'SALDO', 'IMPORTO FATTURA'];
                 foreach ($headers as $i => $header) {
                     $col = chr(65 + $i);
                     $sheet->setCellValue("{$col}3", $header);
@@ -76,6 +76,13 @@ class MovimentiExport implements FromArray, WithEvents, WithTitle
                 $sheet->getStyle('A3:J3')->applyFromArray([
                     'font'      => ['bold' => true, 'color' => ['argb' => 'FFFFFFFF']],
                     'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF922B21']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                    'borders'   => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['argb' => 'FFFFFFFF']]],
+                ]);
+                // Intestazione colonna K separata
+                $sheet->getStyle('K3')->applyFromArray([
+                    'font'      => ['bold' => true, 'color' => ['argb' => 'FFFFFFFF']],
+                    'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF5B4FCF']],
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
                     'borders'   => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['argb' => 'FFFFFFFF']]],
                 ]);
@@ -98,29 +105,27 @@ class MovimentiExport implements FromArray, WithEvents, WithTitle
                         : -(float) $saldo_banca_mov->importo;
                 }
 
-                // Riga 4: saldi di apertura
                 $sheet->setCellValue('A4', 'Saldi di apertura');
                 $sheet->setCellValue('G4', number_format($saldo_cassa_ap, 2, ',', '.'));
                 $sheet->setCellValue('J4', number_format($saldo_banca_ap, 2, ',', '.'));
-                $sheet->getStyle('A4:J4')->applyFromArray([
+                $sheet->getStyle('A4:K4')->applyFromArray([
                     'font' => ['bold' => true, 'italic' => true],
                     'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFF2F2F2']],
                 ]);
 
-                // --- IDs da escludere (saldi iniziali) ---
+                // --- IDs da escludere ---
                 $escludi_ids = collect([$saldo_cassa_mov?->id, $saldo_banca_mov?->id])->filter()->all();
 
-                // --- Raccolta movimenti (escludi saldi iniziali) ---
+                // --- Movimenti ---
                 $movimentiQuery = Movimento::with('categoria')
                     ->whereNotIn('id', $escludi_ids)
-                    ->orderBy('data')
-                    ->orderBy('id');
+                    ->orderBy('data')->orderBy('id');
                 if ($this->da) $movimentiQuery->whereDate('data', '>=', $this->da);
                 if ($this->a)  $movimentiQuery->whereDate('data', '<=', $this->a);
                 if ($this->conto) $movimentiQuery->where('conto', $this->conto);
                 $movimenti = $movimentiQuery->get();
 
-                // --- Raccolta fatture ---
+                // --- Fatture ---
                 $fattureQuery = Fattura::with('categoria')->orderBy('data')->orderBy('id');
                 if ($this->da) $fattureQuery->whereDate('data', '>=', $this->da);
                 if ($this->a)  $fattureQuery->whereDate('data', '<=', $this->a);
@@ -164,11 +169,12 @@ class MovimentiExport implements FromArray, WithEvents, WithTitle
                     $sheet->setCellValue("B{$row}", $riga['controparte']);
                     $sheet->setCellValue("C{$row}", $riga['descrizione']);
 
-                    $importo = $riga['importo'];
-                    $verso   = $riga['verso'];
-                    $conto   = $riga['conto'];
-
                     if ($riga['tipo'] === 'movimento') {
+                        // Riga normale — aggiorna saldo
+                        $importo = $riga['importo'];
+                        $verso   = $riga['verso'];
+                        $conto   = $riga['conto'];
+
                         if ($conto === 'cassa') {
                             if ($verso === 'entrata') {
                                 $sheet->setCellValue("E{$row}", number_format($importo, 2, ',', '.'));
@@ -190,26 +196,38 @@ class MovimentiExport implements FromArray, WithEvents, WithTitle
                         }
 
                         $bgColor = ($row % 2 === 0) ? 'FFFFFFFF' : 'FFF9F9F9';
-                        $sheet->getStyle("A{$row}:J{$row}")->applyFromArray([
+                        $sheet->getStyle("A{$row}:K{$row}")->applyFromArray([
                             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => $bgColor]],
                         ]);
 
                     } else {
-                        // Fattura
+                        // Riga fattura — NON tocca il saldo, importo in colonna K
                         $isFatturaPagata = $riga['stato'] === 'pagata';
-                        $bgColor = $isFatturaPagata ? 'FFE8F5E9' : 'FFFFFDE7';
+                        $isParziale      = $riga['stato'] === 'parziale';
 
-                        if ($verso === 'uscita') {
-                            $sheet->setCellValue("F{$row}", number_format($importo, 2, ',', '.'));
+                        if ($isFatturaPagata) {
+                            $bgColor    = 'FFE8F5E9'; // verde chiaro
+                            $statoLabel = '✓ pagata';
+                        } elseif ($isParziale) {
+                            $bgColor    = 'FFFFF3CD'; // giallo arancio
+                            $statoLabel = '◑ parziale';
                         } else {
-                            $sheet->setCellValue("E{$row}", number_format($importo, 2, ',', '.'));
+                            $bgColor    = 'FFFFFDE7'; // giallo chiaro
+                            $statoLabel = '⏳ da pagare';
                         }
 
-                        $sheet->setCellValue("D{$row}", $isFatturaPagata ? '[pagata]' : '[da pagare]');
+                        $sheet->setCellValue("D{$row}", $statoLabel);
+                        $sheet->setCellValue("K{$row}", number_format($riga['importo'], 2, ',', '.'));
 
-                        $sheet->getStyle("A{$row}:J{$row}")->applyFromArray([
+                        $sheet->getStyle("A{$row}:K{$row}")->applyFromArray([
                             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => $bgColor]],
                             'font' => ['italic' => true],
+                        ]);
+
+                        // Bordo sinistro colorato per evidenziare le fatture
+                        $borderColor = $isFatturaPagata ? 'FF16A34A' : ($isParziale ? 'FFD97706' : 'FFDC2626');
+                        $sheet->getStyle("A{$row}")->applyFromArray([
+                            'borders' => ['left' => ['borderStyle' => Border::BORDER_THICK, 'color' => ['argb' => $borderColor]]],
                         ]);
                     }
 
@@ -218,30 +236,37 @@ class MovimentiExport implements FromArray, WithEvents, WithTitle
 
                 // --- Saldo finale ---
                 $row++;
-                $sheet->setCellValue("D{$row}", 'SALDO FINALE');
+                $sheet->mergeCells("A{$row}:D{$row}");
+                $sheet->setCellValue("A{$row}", 'SALDO FINALE');
                 $sheet->setCellValue("G{$row}", number_format($saldo_cassa, 2, ',', '.'));
                 $sheet->setCellValue("J{$row}", number_format($saldo_banca, 2, ',', '.'));
-                $sheet->getStyle("A{$row}:J{$row}")->applyFromArray([
-                    'font' => ['bold' => true],
-                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFFBBFCA']],
+                $sheet->getStyle("A{$row}:K{$row}")->applyFromArray([
+                    'font'      => ['bold' => true],
+                    'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFFBBFCA']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
                 ]);
 
                 // --- Larghezze colonne ---
-                $sheet->getColumnDimension('A')->setWidth(14);
-                $sheet->getColumnDimension('B')->setWidth(30);
-                $sheet->getColumnDimension('C')->setWidth(40);
-                $sheet->getColumnDimension('D')->setWidth(14);
-                $sheet->getColumnDimension('E')->setWidth(14);
-                $sheet->getColumnDimension('F')->setWidth(14);
-                $sheet->getColumnDimension('G')->setWidth(14);
-                $sheet->getColumnDimension('H')->setWidth(14);
-                $sheet->getColumnDimension('I')->setWidth(14);
-                $sheet->getColumnDimension('J')->setWidth(14);
+                $sheet->getColumnDimension('A')->setWidth(13);
+                $sheet->getColumnDimension('B')->setWidth(28);
+                $sheet->getColumnDimension('C')->setWidth(38);
+                $sheet->getColumnDimension('D')->setWidth(13);
+                $sheet->getColumnDimension('E')->setWidth(13);
+                $sheet->getColumnDimension('F')->setWidth(13);
+                $sheet->getColumnDimension('G')->setWidth(13);
+                $sheet->getColumnDimension('H')->setWidth(13);
+                $sheet->getColumnDimension('I')->setWidth(13);
+                $sheet->getColumnDimension('J')->setWidth(13);
+                $sheet->getColumnDimension('K')->setWidth(15);
 
-                // --- Bordi ---
-                $lastRow = $row;
-                $sheet->getStyle("A3:J{$lastRow}")->applyFromArray([
+                // --- Bordi generali ---
+                $sheet->getStyle("A3:K{$row}")->applyFromArray([
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['argb' => 'FFCCCCCC']]],
+                ]);
+
+                // Linea divisoria tra le colonne J e K
+                $sheet->getStyle("K3:K{$row}")->applyFromArray([
+                    'borders' => ['left' => ['borderStyle' => Border::BORDER_MEDIUM, 'color' => ['argb' => 'FF5B4FCF']]],
                 ]);
             },
         ];
