@@ -1,7 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex gap-3">
-            <a href="{{ route('movimenti.export') }}"
+            <a href="{{ route('movimenti.export', array_filter([
+    'da'    => request('da'),
+    'a'     => request('a'),
+    'conto' => request('conto'),
+])) }}"
                style="background:#16a34a;color:white;padding:8px 16px;border-radius:8px;font-size:0.875rem;text-decoration:none;">
                 ↓ Esporta Excel
             </a>
